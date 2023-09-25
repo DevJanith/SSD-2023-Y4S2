@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import Feedback from "../models/feedback.model.js";
+import validator from "validator";
 
 //add feedback
 export const createFeedback = async (req, res) => {
-  //   const feedback = req.body;
   var now = new Date();
   const userID = req.body.userID;
   const name = req.body.name;
@@ -13,14 +13,29 @@ export const createFeedback = async (req, res) => {
   const rating = req.body.rating;
   const date = now;
 
+  // Validate user inputs
+  if (!validator.isEmail(email)) {
+    return res.status(400).json({ message: "Invalid email address" });
+  }
+  if (isNaN(Number(mobile))) {
+    return res.status(400).json({ message: "Invalid mobile number" });
+  }
+  if (isNaN(rating)) {
+    return res.status(400).json({ message: "Rating must be a numeric value" });
+  }
+
+  // Sanitize input fields
+  const sanitizedDescription = validator.escape(description).toString();
+  const sanitizedName = validator.escape(name).toString();
+
   const feedback = {
-    userID,
-    name,
-    email,
-    mobile,
-    description,
-    rating,
-    date,
+    userID: userID,
+    name: sanitizedName,
+    email: email,
+    mobile: mobile,
+    description: sanitizedDescription,
+    rating: rating,
+    date: date,
   };
   console.log(feedback);
 
@@ -114,8 +129,12 @@ export const getUserFeedbacks = async (req, res) => {
 
 //get report data
 export const getFeedbackReport = async (req, res) => {
-  const startDate = req.body.start;
-  const endDate = req.body.end;
+  const startDate = new Date(req.body.start);
+  const endDate = new Date(req.body.end);
+
+  if (isNaN(startDate) || isNaN(endDate)) {
+    return res.status(400).json({ message: "Invalid date format" });
+  }
 
   try {
     const Feedbacks = await Feedback.find({
