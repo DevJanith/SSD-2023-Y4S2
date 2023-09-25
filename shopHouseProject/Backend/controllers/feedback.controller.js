@@ -129,8 +129,12 @@ export const getUserFeedbacks = async (req, res) => {
 
 //get report data
 export const getFeedbackReport = async (req, res) => {
-  const startDate = req.body.start;
-  const endDate = req.body.end;
+  const startDate = new Date(req.body.start);
+  const endDate = new Date(req.body.end);
+
+  if (isNaN(startDate) || isNaN(endDate)) {
+    return res.status(400).json({ message: "Invalid date format" });
+  }
 
   try {
     const Feedbacks = await Feedback.find({
