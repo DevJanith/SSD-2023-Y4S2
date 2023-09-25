@@ -97,7 +97,8 @@ export function FeedBackViewManagement(props) {
   useEffect(() => {
     setLoading(true);
     axios
-      .get("https://shop-house-eca5b0c5-2934-4483.herokuapp.com/shop-house/feedback/")
+      // .get("https://shop-house-eca5b0c5-2934-4483.herokuapp.com/shop-house/feedback/")
+      .get("http://localhost:5000/shop-house/feedback/")
       .then((res) => {
         setTableData(res.data.data);
         console.log(tableData);
@@ -120,7 +121,8 @@ export function FeedBackViewManagement(props) {
       end: endDate.toISOString(),
     };
     axios
-      .post("https://shop-house-eca5b0c5-2934-4483.herokuapp.com/shop-house/feedback/report", filter)
+      // .post("https://shop-house-eca5b0c5-2934-4483.herokuapp.com/shop-house/feedback/report", filter)
+      .post("http://localhost:5000/shop-house/feedback/report", filter)
       .then((res) => {
         console.log(res);
         if (res.data.data) {

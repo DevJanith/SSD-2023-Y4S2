@@ -234,8 +234,13 @@ export function FeedBackView(props) {
   //get all feedback start
   useEffect(() => {
     axios
+      // .get(
+      //   `https://shop-house-eca5b0c5-2934-4483.herokuapp.com/shop-house/feedback/user/${window.sessionStorage.getItem(
+      //     "userId"
+      //   )}`
+      // )
       .get(
-        `https://shop-house-eca5b0c5-2934-4483.herokuapp.com/shop-house/feedback/user/${window.sessionStorage.getItem(
+        `http://localhost:5000/shop-house/feedback/user/${window.sessionStorage.getItem(
           "userId"
         )}`
       )
