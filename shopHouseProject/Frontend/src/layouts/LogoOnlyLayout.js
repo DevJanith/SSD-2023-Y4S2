@@ -46,7 +46,7 @@ export default function LogoOnlyLayout() {
               googleAuth();
             }}
           >
-            Sign Up
+            Sign Up with Google
           </Button>
         </>
       )}
