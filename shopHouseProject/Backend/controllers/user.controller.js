@@ -4,7 +4,7 @@ import uuid from "react-uuid";
 import mongoose from "mongoose";
 import nodemailer from "nodemailer";
 import User from "../models/user.model.js";
-
+import validator from "validator";
 export const signIn = async (req, res) => {
   const { email, password } = req.body;
 
@@ -44,6 +44,7 @@ export const signIn = async (req, res) => {
 
     res.status(200).json({ code: "01", result: existingUser, token });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ code: "00", message: "Something went wrong" });
   }
 };
