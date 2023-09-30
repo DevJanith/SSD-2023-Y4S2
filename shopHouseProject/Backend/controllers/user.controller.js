@@ -1,43 +1,78 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import uuid from "react-uuid";
 import mongoose from "mongoose";
 import nodemailer from "nodemailer";
+import uuid from "react-uuid";
 import User from "../models/user.model.js";
+import axios from 'axios';
 
 export const signIn = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, type, code } = req.body;
 
   try {
-    if (email === null || typeof email == "undefined")
-      return res
-        .status(400)
-        .json({ code: "02", message: "Email Field Required" });
+    let userEmail;
 
-    // Validate the password using the validatePassword function
-    if (!validatePassword(password)) {
-      return res
-        .status(400)
-        .json({ code: "02", message: "Invalid Password Format" });
+    console.log(type, code);
+
+    if (type === "google") {
+      const googleCode = code; // Assuming you receive the "code" in the request body
+
+      // Step 1: Exchange the Google code for an access token and ID token
+      const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
+        code: googleCode,
+        client_id: '1080426972385-5993vdo0adoqlb91gr31p6rmerk4ljt6.apps.googleusercontent.com',
+        client_secret: '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',
+        redirect_uri: 'http://localhost:3000',
+        grant_type: 'authorization_code',
+      });
+
+      const { access_token, id_token } = tokenResponse.data;
+
+      // Step 2: Retrieve user information from Google using the access token
+      const userInfoResponse = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+
+      const { email: googleEmail } = userInfoResponse.data;
+
+      userEmail = googleEmail
+
+    } else {
+      if (email === null || typeof email == "undefined")
+        return res
+          .status(400)
+          .json({ code: "02", message: "Email Field Required" });
+
+      // Validate the password using the validatePassword function
+      if (!validatePassword(password)) {
+        return res
+          .status(400)
+          .json({ code: "02", message: "Invalid Password Format" });
+      }
+
+      if (!validator.isEmail(email)) {
+        return res.status(400).json({ message: "Invalid email address" });
+      }
+
+      const isPasswordCorrect = await bcrypt.compare(
+        password,
+        existingUser.password
+      );
+      if (!isPasswordCorrect)
+        return res
+          .status(400)
+          .json({ code: "02", message: "Invalid Credentials" });
+
+      userEmail = email
     }
 
-    if (!validator.isEmail(email)) {
-      return res.status(400).json({ message: "Invalid email address" });
-    }
-    const existingUser = await User.findOne({ email: email });
+    const existingUser = await User.findOne({ email: userEmail });
     if (!existingUser)
       return res
         .status(404)
         .json({ code: "02", message: "User doesn't exist" });
-
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      existingUser.password
-    );
-    if (!isPasswordCorrect)
-      return res
-        .status(400)
-        .json({ code: "02", message: "Invalid Credentials" });
 
     const token = jwt.sign(
       { email: existingUser.email, id: existingUser._id },
@@ -47,6 +82,7 @@ export const signIn = async (req, res) => {
 
     res.status(200).json({ code: "01", result: existingUser, token });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ code: "00", message: "Something went wrong" });
   }
 };
