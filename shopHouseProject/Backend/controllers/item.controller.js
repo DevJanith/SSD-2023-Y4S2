@@ -44,7 +44,7 @@ export const createItem = async (req, res) => {
 export const getItem = async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(404).send(`Invalid id: ${id}`);
+    return res.status(404).send(`Invalid id`);
   }
   try {
     const item = await Item.findById(id);
@@ -104,7 +104,7 @@ export const updateItem = async (req, res) => {
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(404).send(`No Item with id: ${id}`);
+      return res.status(404).send(`Invalid Id`);
     }
 
     const updatedItem = { category, name, price, qty, description, _id: id };
@@ -124,7 +124,7 @@ export const deleteItem = async (req, res) => {
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(404).send(`No Item with id: ${id}`);
+      return res.status(404).send(`Invalid Id`);
     }
 
     await Item.findByIdAndDelete(id);

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 import Item from "../models/item.models.js";
 import Product from "../models/product.model.js";
 
@@ -9,20 +9,17 @@ export const getProducts = async (req, res) => {
 
     res.status(200);
     res.json(Products);
-
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return {
       success: false,
-      data: { message: error.message }
-    }
+      data: { message: error.message },
+    };
   }
-}
+};
 
 //add Product
 export const createProduct = async (req, res) => {
-
-
   try {
     //update the item
     const item = req.body;
@@ -47,12 +44,11 @@ export const createProduct = async (req, res) => {
     //   savedProductData: newProduct
     // });
     res.json(updateProduct);
-
   } catch (error) {
     res.status(409);
     res.json({ message: error.message });
   }
-}
+};
 
 // export const signUp = async (req, res) => {
 //     const {
@@ -120,21 +116,29 @@ export const getProduct = async (req, res) => {
     res.json(product);
   } catch (error) {
     res.status(404);
-    res.json({ "message": error.message });
+    res.json({ message: error.message });
   }
-}
+};
 
 //update Products that has approved
 export const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { itemCategory, itemName, itemPrice, itemQuantity, itemDescription } = req.body;
+  const { itemCategory, itemName, itemPrice, itemQuantity, itemDescription } =
+    req.body;
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(404).send(`No Product with id: ${id}`);
+      return res.status(404).send(`Invalid Id`);
     }
 
-    const updatedProduct = { itemCategory, itemName, itemPrice, itemQuantity, itemDescription, _id: id };
+    const updatedProduct = {
+      itemCategory,
+      itemName,
+      itemPrice,
+      itemQuantity,
+      itemDescription,
+      _id: id,
+    };
 
     await Product.findByIdAndUpdate(id, updatedProduct, { new: true });
 
@@ -142,9 +146,9 @@ export const updateProduct = async (req, res) => {
     res.json(updatedProduct);
   } catch (error) {
     res.status(404);
-    res.json({ "message": error.message });
+    res.json({ message: error.message });
   }
-}
+};
 
 //delete Products that has approved
 export const deleteProduct = async (req, res) => {
@@ -152,17 +156,17 @@ export const deleteProduct = async (req, res) => {
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(404).send(`No Product with id: ${id}`);
+      return res.status(404).send(`Invalid Id`);
     }
 
     await Product.findByIdAndDelete(id);
     res.status(200);
-    res.json({ "message": "Product Deleted Successfully" });
+    res.json({ message: "Product Deleted Successfully" });
   } catch (error) {
     res.status(404);
-    res.json({ "message": error.message });
+    res.json({ message: error.message });
   }
-}
+};
 
 //get report data
 export const getProductReport = async (req, res) => {
