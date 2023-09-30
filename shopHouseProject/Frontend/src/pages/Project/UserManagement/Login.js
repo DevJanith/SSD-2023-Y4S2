@@ -99,7 +99,7 @@ export default function Login() {
               Enter your details below.
             </Typography>
 
-            {/* <AuthSocial /> */}
+            <AuthSocial />
 
             <LoginForm />
 

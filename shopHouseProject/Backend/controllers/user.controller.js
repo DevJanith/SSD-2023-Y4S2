@@ -13,10 +13,13 @@ export const signIn = async (req, res) => {
       return res
         .status(400)
         .json({ code: "02", message: "Email Field Required" });
-    if (password === null || typeof password == "undefined")
+
+    // Validate the password using the validatePassword function
+    if (!validatePassword(password)) {
       return res
         .status(400)
-        .json({ code: "02", message: "Password Field Required" });
+        .json({ code: "02", message: "Invalid Password Format" });
+    }
 
     if (!validator.isEmail(email)) {
       return res.status(400).json({ message: "Invalid email address" });
@@ -47,6 +50,20 @@ export const signIn = async (req, res) => {
     res.status(500).json({ code: "00", message: "Something went wrong" });
   }
 };
+
+// Function to validate the password
+function validatePassword(password) {
+  // Regular expressions to check for special characters and numeric characters
+  const specialCharacterRegex = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\-]/;
+  const numericCharacterRegex = /[0-9]/;
+
+  // Check if the password is at least 8 characters long and contains the required characters
+  return (
+    password.length >= 8 &&
+    specialCharacterRegex.test(password) &&
+    numericCharacterRegex.test(password)
+  );
+}
 
 export const signUp = async (req, res) => {
   const {
