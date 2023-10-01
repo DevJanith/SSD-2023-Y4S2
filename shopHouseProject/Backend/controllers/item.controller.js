@@ -1,133 +1,137 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 import Item from "../models/item.models.js";
 
 export const getItems = async (req, res) => {
-    try {
-        const Items = await Item.find();
+  try {
+    const Items = await Item.find();
 
-        // return {
-        //     success: true,
-        //     data: Items
-        // }
+    // return {
+    //     success: true,
+    //     data: Items
+    // }
 
-        res.status(200);
-        res.json(Items);
+    res.status(200);
+    res.json(Items);
+  } catch (error) {
+    console.log(error);
 
-    } catch (error) {
-        console.log(error)
+    res.status(404);
+    res.json({ message: error.message });
 
-        res.status(404);
-        res.json({ message: error.message })
-
-        // return {
-        //     success: false,
-        //     data: { message: error.message }
-        // }
-    }
-}
+    // return {
+    //     success: false,
+    //     data: { message: error.message }
+    // }
+  }
+};
 
 export const createItem = async (req, res) => {
-    const item = req.body;
+  const item = req.body;
 
-    const newItem = new Item(item);
-    try {
-        await newItem.save();
+  const newItem = new Item(item);
+  try {
+    await newItem.save();
 
-        res.status(201);
-        res.json(newItem);
-
-    } catch (error) {
-        res.status(409);
-        res.json({ message: error.message });
-    }
-}
+    res.status(201);
+    res.json(newItem);
+  } catch (error) {
+    res.status(409);
+    res.json({ message: error.message });
+  }
+};
 
 export const getItem = async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).send(`Invalid id`);
+  }
+  try {
+    const item = await Item.findById(id);
 
-    try {
-        const item = await Item.findById(id);
-
-        res.status(200);
-        res.json(item);
-    } catch (error) {
-        res.status(404);
-        res.json({ "message": error.message });
-    }
-}
+    res.status(200);
+    res.json(item);
+  } catch (error) {
+    res.status(404);
+    res.json({ message: error.message });
+  }
+};
 
 //get report data
 export const getItemReport = async (req, res) => {
-    const startDate = req.body.start;
-    const endDate = req.body.end;
-  
-    try {
-      const Items = await Item.find({
-        createdAt: {
-          $gte: startDate,
-          $lte: endDate,
+  const startDate = new Date(req.body.start);
+  const endDate = new Date(req.body.end);
+
+  if (isNaN(startDate) || isNaN(endDate)) {
+    return res.status(400).json({ message: "Invalid date format" });
+  }
+
+  try {
+    const Items = await Item.find({
+      createdAt: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    }).sort({
+      createdAt: 1,
+    });
+
+    res.status(200);
+
+    if (Items.length != 0) {
+      res.json({
+        filter: {
+          startDate,
+          endDate,
         },
-      }).sort({
-        createdAt: 1,
+        data: Items,
       });
-  
-      res.status(200);
-  
-      if (Items.length != 0) {
-        res.json({
-          filter: {
-            startDate,
-            endDate,
-          },
-          data: Items,
-        });
-      } else {
-        res.json({
-          message: "No Data for selected filter",
-          data: null,
-        });
-      }
-    } catch (error) {
-      res.status(404);
-      res.json({ message: error.message });
+    } else {
+      res.json({
+        message: "No Data for selected filter",
+        data: null,
+      });
     }
-  };
+  } catch (error) {
+    res.status(404);
+    res.json({ message: error.message });
+  }
+};
 
 export const updateItem = async (req, res) => {
-    const { id } = req.params;
-    const { category,name,price,qty,description } = req.body;
+  const { id } = req.params;
+  const { category, name, price, qty, description } = req.body;
 
-    try {
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(404).send(`No Item with id: ${id}`);
-        }
-
-        const updatedItem = { category,name,price,qty,description, _id: id };
-
-        await Item.findByIdAndUpdate(id, updatedItem, { new: true });
-
-        res.status(200);
-        res.json(updatedItem);
-    } catch (error) {
-        res.status(404);
-        res.json({ "message": error.message });
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).send(`Invalid Id`);
     }
-}
+
+    const updatedItem = { category, name, price, qty, description, _id: id };
+
+    await Item.findByIdAndUpdate(id, updatedItem, { new: true });
+
+    res.status(200);
+    res.json(updatedItem);
+  } catch (error) {
+    res.status(404);
+    res.json({ message: error.message });
+  }
+};
 
 export const deleteItem = async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    try {
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(404).send(`No Item with id: ${id}`);
-        }
-
-        await Item.findByIdAndDelete(id);
-        res.status(200);
-        res.json({ "message": "Item Deleted Successfully" });
-    } catch (error) {
-        res.status(404);
-        res.json({ "message": error.message });
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).send(`Invalid Id`);
     }
-}
+
+    await Item.findByIdAndDelete(id);
+    res.status(200);
+    res.json({ message: "Item Deleted Successfully" });
+  } catch (error) {
+    res.status(404);
+    res.json({ message: error.message });
+  }
+};

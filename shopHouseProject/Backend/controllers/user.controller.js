@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
@@ -9,7 +9,7 @@ import User from "../models/user.model.js";
 
 dotenv.config();
 
-
+import validator from "validator";
 export const signIn = async (req, res) => {
   const { email, password, type, code } = req.body;
 
@@ -20,27 +20,33 @@ export const signIn = async (req, res) => {
       const googleCode = code; // Assuming you receive the "code" in the request body
 
       // Step 1: Exchange the Google code for an access token and ID token
-      const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
-        code: googleCode,
-        client_id: '1080426972385-5993vdo0adoqlb91gr31p6rmerk4ljt6.apps.googleusercontent.com',
-        client_secret: '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',
-        redirect_uri: 'http://localhost:3000',
-        grant_type: 'authorization_code',
-      });
+      const tokenResponse = await axios.post(
+        "https://oauth2.googleapis.com/token",
+        {
+          code: googleCode,
+          client_id:
+            "1080426972385-5993vdo0adoqlb91gr31p6rmerk4ljt6.apps.googleusercontent.com",
+          client_secret: "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",
+          redirect_uri: "http://localhost:3000",
+          grant_type: "authorization_code",
+        }
+      );
 
       const { access_token, id_token } = tokenResponse.data;
 
       // Step 2: Retrieve user information from Google using the access token
-      const userInfoResponse = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      });
+      const userInfoResponse = await axios.get(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        }
+      );
 
       const { email: googleEmail } = userInfoResponse.data;
 
-      userEmail = googleEmail
-
+      userEmail = googleEmail;
     } else {
       if (email === null || typeof email == "undefined")
         return res
@@ -67,22 +73,27 @@ export const signIn = async (req, res) => {
           .status(400)
           .json({ code: "02", message: "Invalid Credentials" });
 
-      userEmail = email
+      userEmail = email;
     }
 
     const existingUser = await User.findOne({ email: userEmail });
-    if (!existingUser) return res.status(404).json({ code: "02", message: "User doesn't exist" });
+    if (!existingUser)
+      return res
+        .status(404)
+        .json({ code: "02", message: "User doesn't exist" });
 
-    const token = jwt.sign({
-      email: existingUser.email, id: existingUser._id
-    },
+    const token = jwt.sign(
+      {
+        email: existingUser.email,
+        id: existingUser._id,
+      },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
     res.status(200).json({ code: "01", result: existingUser, token });
   } catch (error) {
-    console.error(error);
+    console.log(error);
     res.status(500).json({ code: "00", message: "Something went wrong" });
   }
 };
@@ -116,19 +127,44 @@ export const signUp = async (req, res) => {
   } = req.body;
 
   try {
-    if (type === null || typeof type == "undefined") return res.status(400).json({ code: "02", message: "Type Field Required" });
-    if (email === null || typeof email == "undefined") return res.status(400).json({ code: "02", message: "Email Field Required" });
-    if (userFirstName === null || typeof userFirstName == "undefined") return res.status(400).json({ code: "02", message: "User First Name Field Required" });
-    if (userLastName === null || typeof userLastName == "undefined") return res.status(400).json({ code: "02", message: "User Last Name Field Required" });
-    if (userContactNumber === null || typeof userContactNumber == "undefined") return res.status(400).json({ code: "02", message: "User Contact Number Field Required" });
-    if (!validator.isEmail(email)) return res.status(400).json({ message: "Invalid email address" });
+    if (type === null || typeof type == "undefined")
+      return res
+        .status(400)
+        .json({ code: "02", message: "Type Field Required" });
+    if (email === null || typeof email == "undefined")
+      return res
+        .status(400)
+        .json({ code: "02", message: "Email Field Required" });
+    if (userFirstName === null || typeof userFirstName == "undefined")
+      return res
+        .status(400)
+        .json({ code: "02", message: "User First Name Field Required" });
+    if (userLastName === null || typeof userLastName == "undefined")
+      return res
+        .status(400)
+        .json({ code: "02", message: "User Last Name Field Required" });
+    if (userContactNumber === null || typeof userContactNumber == "undefined")
+      return res
+        .status(400)
+        .json({ code: "02", message: "User Contact Number Field Required" });
+    if (!validator.isEmail(email))
+      return res.status(400).json({ message: "Invalid email address" });
 
     const existingUser = await User.findOne({ email: email });
-    if (existingUser) return res.status(400).json({ code: "02", message: "User already exist" });
+    if (existingUser)
+      return res
+        .status(400)
+        .json({ code: "02", message: "User already exist" });
 
     if (type == "buyer") {
-      if (password === null || typeof password == "undefined") return res.status(400).json({ code: "02", message: "Password Field Required" });
-      if (password !== confirmPassword) return res.status(400).json({ code: "02", message: "Password doesn't match" });
+      if (password === null || typeof password == "undefined")
+        return res
+          .status(400)
+          .json({ code: "02", message: "Password Field Required" });
+      if (password !== confirmPassword)
+        return res
+          .status(400)
+          .json({ code: "02", message: "Password doesn't match" });
 
       const hashPassword = await bcrypt.hash(password, 12);
 
@@ -235,9 +271,7 @@ export const updateUser = async (req, res) => {
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res
-        .status(404)
-        .json({ code: "02", message: `No User for this id: ${id}` });
+      return res.status(404).json({ code: "02", message: `Invalid Id` });
     }
 
     if (data.type == "buyer" || data.type == "admin") {
@@ -295,9 +329,7 @@ export const deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res
-        .status(404)
-        .json({ code: "02", message: `No User for this id: ${id}` });
+      return res.status(404).json({ code: "02", message: `Invalid Id` });
     }
 
     await User.findByIdAndDelete(id);

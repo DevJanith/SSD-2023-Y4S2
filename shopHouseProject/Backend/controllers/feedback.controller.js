@@ -51,9 +51,8 @@ export const createFeedback = async (req, res) => {
       type: "POST",
     });
   } catch (error) {
-    res.status(409);
-    res.json({ message: error.message });
-    console.log(error);
+    res.status(500); // Internal Server Error
+    res.json({ message: "Internal server error" });
   }
 };
 
@@ -62,14 +61,18 @@ export const createFeedback = async (req, res) => {
 export const getFeedback = async (req, res) => {
   const id = req.params.id;
 
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).send(`Invalid id`);
+  }
+
   try {
     const feedback = await Feedback.findById(id);
 
     res.status(200);
     res.json(feedback);
   } catch (error) {
-    res.status(404);
-    res.json({ message: error.message });
+    res.status(500); // Internal Server Error
+    res.json({ message: "Internal server error" });
   }
 };
 
@@ -79,15 +82,15 @@ export const deleteFeedback = async (req, res) => {
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(404).send(`No Feedback with id: ${id}`);
+      return res.status(404).send(`Invalid id`);
     }
 
     await Feedback.findByIdAndDelete(id);
     res.status(200);
     res.json({ message: "Feedback Deleted Successfully" });
   } catch (error) {
-    res.status(404);
-    res.json({ message: error.message });
+    res.status(500); // Internal Server Error
+    res.json({ message: "Internal server error" });
   }
 };
 
@@ -107,8 +110,8 @@ export const getFeedbacks = async (req, res) => {
     });
     // res.json(Feedbacks);
   } catch (error) {
-    res.status(404);
-    res.json({ message: error.message });
+    res.status(500); // Internal Server Error
+    res.json({ message: "Internal server error" });
   }
 };
 
@@ -122,8 +125,8 @@ export const getUserFeedbacks = async (req, res) => {
     res.status(200);
     res.json(Feedbacks);
   } catch (error) {
-    res.status(404);
-    res.json({ message: error.message });
+    res.status(500); // Internal Server Error
+    res.json({ message: "Internal server error" });
   }
 };
 
@@ -163,8 +166,8 @@ export const getFeedbackReport = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(404);
-    res.json({ message: error.message });
+    res.status(500); // Internal Server Error
+    res.json({ message: "Internal server error" });
   }
 };
 
@@ -178,7 +181,7 @@ export const updateFeedback = async (req, res) => {
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(404).send(`No Feedback with id: ${id}`);
+      return res.status(404).send(`Invalid id`);
     }
     const updateFeedback = {
       userID,
@@ -192,7 +195,7 @@ export const updateFeedback = async (req, res) => {
     const update = await Feedback.findByIdAndUpdate(id, updateFeedback);
     res.status(200).send({ message: "Feedback Details Updated" });
   } catch (error) {
-    res.status(404);
-    res.json({ message: error.message });
+    res.status(500); // Internal Server Error
+    res.json({ message: "Internal server error" });
   }
 };
