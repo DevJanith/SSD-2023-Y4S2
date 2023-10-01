@@ -1,44 +1,93 @@
+import axios from "axios";
 import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import uuid from "react-uuid";
 import mongoose from "mongoose";
 import nodemailer from "nodemailer";
+import uuid from "react-uuid";
 import User from "../models/user.model.js";
+
+dotenv.config();
+
 import validator from "validator";
 export const signIn = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, type, code } = req.body;
 
   try {
-    if (email === null || typeof email == "undefined")
-      return res
-        .status(400)
-        .json({ code: "02", message: "Email Field Required" });
-    if (password === null || typeof password == "undefined")
-      return res
-        .status(400)
-        .json({ code: "02", message: "Password Field Required" });
+    let userEmail;
 
-    if (!validator.isEmail(email)) {
-      return res.status(400).json({ message: "Invalid email address" });
+    if (type === "google") {
+      const googleCode = code; // Assuming you receive the "code" in the request body
+
+      // Step 1: Exchange the Google code for an access token and ID token
+      const tokenResponse = await axios.post(
+        "https://oauth2.googleapis.com/token",
+        {
+          code: googleCode,
+          client_id:
+            "1080426972385-5993vdo0adoqlb91gr31p6rmerk4ljt6.apps.googleusercontent.com",
+          client_secret: "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",
+          redirect_uri: "http://localhost:3000",
+          grant_type: "authorization_code",
+        }
+      );
+
+      const { access_token, id_token } = tokenResponse.data;
+
+      // Step 2: Retrieve user information from Google using the access token
+      const userInfoResponse = await axios.get(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        }
+      );
+
+      const { email: googleEmail } = userInfoResponse.data;
+
+      userEmail = googleEmail;
+    } else {
+      if (email === null || typeof email == "undefined")
+        return res
+          .status(400)
+          .json({ code: "02", message: "Email Field Required" });
+
+      // Validate the password using the validatePassword function
+      if (!validatePassword(password)) {
+        return res
+          .status(400)
+          .json({ code: "02", message: "Invalid Password Format" });
+      }
+
+      if (!validator.isEmail(email)) {
+        return res.status(400).json({ message: "Invalid email address" });
+      }
+
+      const isPasswordCorrect = await bcrypt.compare(
+        password,
+        existingUser.password
+      );
+      if (!isPasswordCorrect)
+        return res
+          .status(400)
+          .json({ code: "02", message: "Invalid Credentials" });
+
+      userEmail = email;
     }
-    const existingUser = await User.findOne({ email: email });
+
+    const existingUser = await User.findOne({ email: userEmail });
     if (!existingUser)
       return res
         .status(404)
         .json({ code: "02", message: "User doesn't exist" });
 
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      existingUser.password
-    );
-    if (!isPasswordCorrect)
-      return res
-        .status(400)
-        .json({ code: "02", message: "Invalid Credentials" });
-
     const token = jwt.sign(
-      { email: existingUser.email, id: existingUser._id },
-      "test",
+      {
+        email: existingUser.email,
+        id: existingUser._id,
+      },
+      process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
@@ -48,6 +97,20 @@ export const signIn = async (req, res) => {
     res.status(500).json({ code: "00", message: "Something went wrong" });
   }
 };
+
+// Function to validate the password
+function validatePassword(password) {
+  // Regular expressions to check for special characters and numeric characters
+  const specialCharacterRegex = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\-]/;
+  const numericCharacterRegex = /[0-9]/;
+
+  // Check if the password is at least 8 characters long and contains the required characters
+  return (
+    password.length >= 8 &&
+    specialCharacterRegex.test(password) &&
+    numericCharacterRegex.test(password)
+  );
+}
 
 export const signUp = async (req, res) => {
   const {
@@ -84,9 +147,9 @@ export const signUp = async (req, res) => {
       return res
         .status(400)
         .json({ code: "02", message: "User Contact Number Field Required" });
-    if (!validator.isEmail(email)) {
+    if (!validator.isEmail(email))
       return res.status(400).json({ message: "Invalid email address" });
-    }
+
     const existingUser = await User.findOne({ email: email });
     if (existingUser)
       return res
@@ -102,6 +165,7 @@ export const signUp = async (req, res) => {
         return res
           .status(400)
           .json({ code: "02", message: "Password doesn't match" });
+
       const hashPassword = await bcrypt.hash(password, 12);
 
       const userDetails = new User({
@@ -122,7 +186,7 @@ export const signUp = async (req, res) => {
 
       const token = jwt.sign(
         { email: userResult.email, id: userResult._id },
-        "test",
+        process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
 
@@ -146,7 +210,7 @@ export const signUp = async (req, res) => {
 
       const token = jwt.sign(
         { email: userResult.email, id: userResult._id },
-        "test",
+        process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
 

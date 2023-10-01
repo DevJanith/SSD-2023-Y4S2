@@ -1,10 +1,13 @@
 import express from "express";
 import uuid from 'react-uuid';
 import { Stripe } from "stripe";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const router = express.Router();
-const stripe = Stripe("sk_test_51L45q8LRHo7ESm3WbBWnMoykN3km7eS8OjPASjNE3lViFXubXmGMJMVTOL3whVoL21AghocUo5rAOZWNR7iy91qU00oN1kaRVy")
-
+const stripe = Stripe(process.env.STRIPE_API_KEY); // Access the API key from environment variables
+// const stripe = Stripe("sk_test_51L45q8LRHo7ESm3WbBWnMoykN3km7eS8OjPASjNE3lViFXubXmGMJMVTOL3whVoL21AghocUo5rAOZWNR7iy91qU00oN1kaRVy")
  
 router.post("/", (req, res) => {
     const { product, token } = req.body;

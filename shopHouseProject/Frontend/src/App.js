@@ -1,9 +1,10 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import { BaseOptionChartStyle } from "./components/chart/BaseOptionChart";
+import PrivateRoute from "./PrivateRoutes";
 import ScrollToTop from "./components/ScrollToTop";
+import { BaseOptionChartStyle } from "./components/chart/BaseOptionChart";
+import LogoOnlyLayout from "./layouts/LogoOnlyLayout";
 import BuyerLayout from "./layouts/buyer";
 import DashboardLayout from "./layouts/dashboard";
-import LogoOnlyLayout from "./layouts/LogoOnlyLayout";
 import { FeedBack, FeedBackManagement } from "./pages";
 import DashboardApp from "./pages/DashboardApp";
 import NotFound from "./pages/Page404";
@@ -13,14 +14,12 @@ import PaymentInvoice from "./pages/Project/PaymentManagement/PaymentInvoice";
 import PaymentManagement from "./pages/Project/PaymentManagement/PaymentManagement";
 import ProductApproveManagement from "./pages/Project/ProductApproveManagement/ProductManagement";
 import ShopManagement from "./pages/Project/ShopManagement/ShopManagement";
-import TransactionManagement from "./pages/Project/TransactionManagment/TransactionManagment";
 import Login from "./pages/Project/UserManagement/Login";
 import Register from "./pages/Project/UserManagement/Register";
 import User from "./pages/Project/UserManagement/User";
 import UserApprove from "./pages/Project/UserManagement/UserApprove";
 import UserEdit from "./pages/Project/UserManagement/UserEdit";
 import UserView from "./pages/Project/UserManagement/UserView";
-import PrivateRoute from "./PrivateRoutes";
 import ThemeProvider from "./theme";
 import { getToken } from "./pages/Project/UserManagement/Session";
 
