@@ -1,96 +1,94 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 import Tutorial from "../models/tutorial.models.js";
 
 export const getTutorials = async () => {
-    try {
-        const Tutorials = await Tutorial.find();
+  try {
+    const Tutorials = await Tutorial.find();
 
-        return {
-            success: true,
-            data: Tutorials
-        }
+    return {
+      success: true,
+      data: Tutorials,
+    };
 
-        // res.status(200);
-        // res.json(Tutorials);
+    // res.status(200);
+    // res.json(Tutorials);
+  } catch (error) {
+    console.log(error);
 
-    } catch (error) {
-        console.log(error)
+    // res.status(404);
+    // res.json({ message: error.message })
 
-        // res.status(404);
-        // res.json({ message: error.message })
-
-        return {
-            success: false,
-            data: { message: error.message }
-        }
-    }
-}
+    return {
+      success: false,
+      data: { message: error.message },
+    };
+  }
+};
 
 export const createTutorial = async (req, res) => {
-    const tutorial = req.body;
+  const tutorial = req.body;
 
-    const newTutorial = new Tutorial(tutorial);
-    try {
-        await newTutorial.save();
+  const newTutorial = new Tutorial(tutorial);
+  try {
+    await newTutorial.save();
 
-        res.status(201);
-        res.json(newTutorial);
-
-    } catch (error) {
-        res.status(409);
-        res.json({ message: error.message });
-    }
-}
+    res.status(201);
+    res.json(newTutorial);
+  } catch (error) {
+    res.status(409);
+    res.json({ message: error.message });
+  }
+};
 
 export const getTutorial = async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    try {
-        const tutorial = await Tutorial.findById(id);
+  try {
+    const tutorial = await Tutorial.findById(id);
 
-        res.status(200);
-        res.json(tutorial);
-    } catch (error) {
-        res.status(404);
-        res.json({ "message": error.message });
-    }
-}
+    res.status(200);
+    res.json(tutorial);
+  } catch (error) {
+    res.status(404);
+    res.json({ message: error.message });
+  }
+};
 
 export const updateTutorial = async (req, res) => {
-    const { id } = req.params;
-    const { title, description, published } = req.body;
+  const { id } = req.params;
+  const { title, description, published } = req.body;
 
-    try {
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(404).send(`No Tutorial with id: ${id}`);
-        }
-
-        const updatedTutorial = { title, description, published, _id: id };
-
-        await Tutorial.findByIdAndUpdate(id, updatedTutorial, { new: true });
-
-        res.status(200);
-        res.json(updatedTutorial);
-    } catch (error) {
-        res.status(404);
-        res.json({ "message": error.message });
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).send(`Invalid Id `);
     }
-}
+
+    const updatedTutorial = { title, description, published, _id: id };
+
+    await Tutorial.findByIdAndUpdate(id, updatedTutorial, { new: true });
+
+    res.status(200);
+    res.json(updatedTutorial);
+  } catch (error) {
+    res.status(404);
+    res.json({ message: error.message });
+  }
+};
 
 export const deleteTutorial = async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    try {
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(404).send(`No Tutorial with id: ${id}`);
-        }
-
-        await Tutorial.findByIdAndDelete(id);
-        res.status(200);
-        res.json({ "message": "Tutorial Deleted Successfully" });
-    } catch (error) {
-        res.status(404);
-        res.json({ "message": error.message });
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).send(`Invalid Id`);
     }
-}
+
+    await Tutorial.findByIdAndDelete(id);
+    res.status(200);
+    res.json({ message: "Tutorial Deleted Successfully" });
+  } catch (error) {
+    res.status(404);
+    res.json({ message: error.message });
+  }
+};

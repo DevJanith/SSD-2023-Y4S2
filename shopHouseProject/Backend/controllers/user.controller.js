@@ -207,9 +207,7 @@ export const updateUser = async (req, res) => {
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res
-        .status(404)
-        .json({ code: "02", message: `No User for this id: ${id}` });
+      return res.status(404).json({ code: "02", message: `Invalid Id` });
     }
 
     if (data.type == "buyer" || data.type == "admin") {
@@ -267,9 +265,7 @@ export const deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res
-        .status(404)
-        .json({ code: "02", message: `No User for this id: ${id}` });
+      return res.status(404).json({ code: "02", message: `Invalid Id` });
     }
 
     await User.findByIdAndDelete(id);
