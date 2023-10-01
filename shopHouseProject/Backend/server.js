@@ -15,7 +15,7 @@ import passport from "passport";
 import passportSetup from "./passport.js";
 dotenv.config();
 const app = express();
-const allowedOrigins = ["https://localhost:3000"]; // Replace with the desired allowed origin(s)
+const allowedOrigins = ["https://localhost:3000", "http://localhost:3000"]; // Replace with the desired allowed origin(s)
 const corsOptions = {
   origin: function (origin, callback) {
     if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
