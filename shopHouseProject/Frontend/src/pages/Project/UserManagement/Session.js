@@ -19,6 +19,8 @@ export const getToken = () => {
     }
 };
 
+
+
 //access user's name from session storage
 export const getUser = () => {
     console.log("first")
@@ -31,6 +33,20 @@ export const getUser = () => {
         }
     }
 };
+
+//access user's type from session storage
+export const getType = () => {
+    console.log("type")
+    if (window !== 'undefined') {
+        if (sessionStorage.getItem('type')) {
+            return JSON.parse(sessionStorage.getItem('type'));
+        }
+        else {
+            return false;
+        }
+    }
+};
+
 
 
 //remove token from session storage
