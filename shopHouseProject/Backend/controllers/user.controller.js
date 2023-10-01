@@ -1,18 +1,20 @@
+import axios from 'axios';
 import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import nodemailer from "nodemailer";
 import uuid from "react-uuid";
 import User from "../models/user.model.js";
-import axios from 'axios';
+
+dotenv.config();
+
 
 export const signIn = async (req, res) => {
   const { email, password, type, code } = req.body;
 
   try {
     let userEmail;
-
-    console.log(type, code);
 
     if (type === "google") {
       const googleCode = code; // Assuming you receive the "code" in the request body
@@ -69,14 +71,12 @@ export const signIn = async (req, res) => {
     }
 
     const existingUser = await User.findOne({ email: userEmail });
-    if (!existingUser)
-      return res
-        .status(404)
-        .json({ code: "02", message: "User doesn't exist" });
+    if (!existingUser) return res.status(404).json({ code: "02", message: "User doesn't exist" });
 
-    const token = jwt.sign(
-      { email: existingUser.email, id: existingUser._id },
-      "test",
+    const token = jwt.sign({
+      email: existingUser.email, id: existingUser._id
+    },
+      process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
@@ -116,44 +116,20 @@ export const signUp = async (req, res) => {
   } = req.body;
 
   try {
-    if (type === null || typeof type == "undefined")
-      return res
-        .status(400)
-        .json({ code: "02", message: "Type Field Required" });
-    if (email === null || typeof email == "undefined")
-      return res
-        .status(400)
-        .json({ code: "02", message: "Email Field Required" });
-    if (userFirstName === null || typeof userFirstName == "undefined")
-      return res
-        .status(400)
-        .json({ code: "02", message: "User First Name Field Required" });
-    if (userLastName === null || typeof userLastName == "undefined")
-      return res
-        .status(400)
-        .json({ code: "02", message: "User Last Name Field Required" });
-    if (userContactNumber === null || typeof userContactNumber == "undefined")
-      return res
-        .status(400)
-        .json({ code: "02", message: "User Contact Number Field Required" });
-    if (!validator.isEmail(email)) {
-      return res.status(400).json({ message: "Invalid email address" });
-    }
+    if (type === null || typeof type == "undefined") return res.status(400).json({ code: "02", message: "Type Field Required" });
+    if (email === null || typeof email == "undefined") return res.status(400).json({ code: "02", message: "Email Field Required" });
+    if (userFirstName === null || typeof userFirstName == "undefined") return res.status(400).json({ code: "02", message: "User First Name Field Required" });
+    if (userLastName === null || typeof userLastName == "undefined") return res.status(400).json({ code: "02", message: "User Last Name Field Required" });
+    if (userContactNumber === null || typeof userContactNumber == "undefined") return res.status(400).json({ code: "02", message: "User Contact Number Field Required" });
+    if (!validator.isEmail(email)) return res.status(400).json({ message: "Invalid email address" });
+
     const existingUser = await User.findOne({ email: email });
-    if (existingUser)
-      return res
-        .status(400)
-        .json({ code: "02", message: "User already exist" });
+    if (existingUser) return res.status(400).json({ code: "02", message: "User already exist" });
 
     if (type == "buyer") {
-      if (password === null || typeof password == "undefined")
-        return res
-          .status(400)
-          .json({ code: "02", message: "Password Field Required" });
-      if (password !== confirmPassword)
-        return res
-          .status(400)
-          .json({ code: "02", message: "Password doesn't match" });
+      if (password === null || typeof password == "undefined") return res.status(400).json({ code: "02", message: "Password Field Required" });
+      if (password !== confirmPassword) return res.status(400).json({ code: "02", message: "Password doesn't match" });
+
       const hashPassword = await bcrypt.hash(password, 12);
 
       const userDetails = new User({
@@ -174,7 +150,7 @@ export const signUp = async (req, res) => {
 
       const token = jwt.sign(
         { email: userResult.email, id: userResult._id },
-        "test",
+        process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
 
@@ -198,7 +174,7 @@ export const signUp = async (req, res) => {
 
       const token = jwt.sign(
         { email: userResult.email, id: userResult._id },
-        "test",
+        process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
 
