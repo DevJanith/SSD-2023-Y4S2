@@ -19,7 +19,7 @@ const HeaderStyle = styled("header")(({ theme }) => ({
   },
 }));
 
-const googleAuth = () => {
+const googleAuth = async () => {
   window.open(`http://localhost:5000/auth/google/callback`, "_self");
 };
 

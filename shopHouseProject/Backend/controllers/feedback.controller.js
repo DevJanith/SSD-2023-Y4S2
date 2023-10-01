@@ -62,7 +62,7 @@ export const getFeedback = async (req, res) => {
   const id = req.params.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(404).send(`Invalid id: ${id}`);
+    return res.status(404).send(`Invalid id`);
   }
 
   try {
@@ -82,7 +82,7 @@ export const deleteFeedback = async (req, res) => {
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(404).send(`Invalid id: ${id}`);
+      return res.status(404).send(`Invalid id`);
     }
 
     await Feedback.findByIdAndDelete(id);
@@ -181,7 +181,7 @@ export const updateFeedback = async (req, res) => {
 
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(404).send(`Invalid id: ${id}`);
+      return res.status(404).send(`Invalid id`);
     }
     const updateFeedback = {
       userID,

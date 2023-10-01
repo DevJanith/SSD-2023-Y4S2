@@ -38,4 +38,30 @@ router.get("/logout", (req, res) => {
   res.redirect(process.env.CLIENT_URL);
 });
 
+router.get("/auth/google/data", async (req, res) => {
+  const token = req.query.credential;
+
+  try {
+    const client = new OAuth2Client(process.env.CLIENT_URL);
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: googleClientId,
+    });
+
+    const payload = ticket.getPayload();
+    // Extract user details from the payload (e.g., name, email, picture, etc.)
+    const userDetails = {
+      name: payload.name,
+      email: payload.email,
+      picture: payload.picture,
+    };
+
+    // You can now use the userDetails in your application as needed
+    res.json(userDetails);
+  } catch (error) {
+    console.error("Error verifying Google token:", error);
+    res.status(401).json({ error: "Unauthorized" });
+  }
+});
+
 export default router;
