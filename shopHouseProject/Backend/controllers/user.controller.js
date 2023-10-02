@@ -63,11 +63,13 @@ export const signIn = async (req, res) => {
       if (!validator.isEmail(email)) {
         return res.status(400).json({ message: "Invalid email address" });
       }
+      let existingUser = await User.findOne({ email: email });
 
       const isPasswordCorrect = await bcrypt.compare(
         password,
         existingUser.password
       );
+
       if (!isPasswordCorrect)
         return res
           .status(400)
@@ -76,7 +78,7 @@ export const signIn = async (req, res) => {
       userEmail = email;
     }
 
-    const existingUser = await User.findOne({ email: userEmail });
+    let existingUser = await User.findOne({ email: email });
     if (!existingUser)
       return res
         .status(404)
