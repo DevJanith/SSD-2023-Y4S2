@@ -78,7 +78,8 @@ export const signIn = async (req, res) => {
       userEmail = email;
     }
 
-    let existingUser = await User.findOne({ email: email });
+    let existingUser = await User.findOne({ email: userEmail });
+
     if (!existingUser)
       return res
         .status(404)
@@ -108,7 +109,7 @@ function validatePassword(password) {
 
   // Check if the password is at least 8 characters long and contains the required characters
   return (
-    password.length >= 8 &&
+    password.length >= 5 &&
     specialCharacterRegex.test(password) &&
     numericCharacterRegex.test(password)
   );
