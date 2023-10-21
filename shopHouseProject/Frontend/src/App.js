@@ -25,7 +25,7 @@ import { getToken } from "./pages/Project/UserManagement/Session";
 
 export default function App() {
   const user = getToken();
-
+  console.log("user", user);
   return (
     <ThemeProvider>
       <ScrollToTop />
@@ -40,16 +40,16 @@ export default function App() {
 
         <Route path="/dashboard" element={<PrivateRoute component={DashboardLayout} requiredRole="all" />}>
           <Route path="app" element={<PrivateRoute component={DashboardApp} requiredRole="all" />} />
-          <Route path="user-management" element={user ?  user.result.type == "admin" ? <User /> : <Navigate to="/404" /> : <Navigate to="/404" />} />
-          <Route path="approve/:id" element={user ?  user.result.type == "admin" ? <UserApprove /> : <Navigate to="/404" /> : <Navigate to="/404" />} />
-          <Route path="view/:id" element={user ?  user.result.type == "admin" ? <UserView /> : <Navigate to="/404" /> : <Navigate to="/404" />} />
-          <Route path="edit/:id" element={user ?  user.result.type == "admin" ? <UserEdit /> : <Navigate to="/404" /> : <Navigate to="/404" />} />
+          <Route path="user-management" element={user ? user.result.type == "admin" ? <User /> : <Navigate to="/404" /> : <Navigate to="/404" />} />
+          <Route path="approve/:id" element={user ? user.result.type == "admin" ? <UserApprove /> : <Navigate to="/404" /> : <Navigate to="/404" />} />
+          <Route path="view/:id" element={user ? user.result.type == "admin" ? <UserView /> : <Navigate to="/404" /> : <Navigate to="/404" />} />
+          <Route path="edit/:id" element={user ? user.result.type == "admin" ? <UserEdit /> : <Navigate to="/404" /> : <Navigate to="/404" />} />
           <Route path="item-management" element={<ItemManagement />} />
-          <Route path="product-approve-management" element={user ?  user.result.type == "admin" ? <ProductApproveManagement /> : <Navigate to="/404" /> : <Navigate to="/404" />} />
+          <Route path="product-approve-management" element={user ? user.result.type == "admin" ? <ProductApproveManagement /> : <Navigate to="/404" /> : <Navigate to="/404" />} />
           <Route path="shop-management" element={<ShopManagement />} />
           <Route path="payment-management" element={<PaymentInvoice />} />
           <Route path="transaction-management" element={<PaymentManagement />} />
-          <Route path="feedback-management" element={user ?  user.result.type == "admin" ? <FeedBackManagement /> : <Navigate to="/404" /> : <Navigate to="/404" />} />
+          <Route path="feedback-management" element={user ? user.result.type == "admin" ? <FeedBackManagement /> : <Navigate to="/404" /> : <Navigate to="/404" />} />
           <Route path="feedback" element={<FeedBack />} />
           <Route path="*" element={<Navigate to="/404" />} />
         </Route>
